@@ -89,7 +89,7 @@ type SearchParams = { searchParams: Promise<{ saved?: string }> };
 export default async function AdminPricingPage({ searchParams }: SearchParams) {
   const { saved } = await searchParams;
   const admin = await getAdminOrNull();
-  if (!isSuperAdmin(admin)) redirect("/admin/login");
+  if (!admin || !isSuperAdmin(admin)) redirect("/admin/login");
 
   const plans = await getPricingPlans();
 
@@ -97,7 +97,7 @@ export default async function AdminPricingPage({ searchParams }: SearchParams) {
     "use server";
 
     const actingAdmin = await getAdminOrNull();
-    if (!isSuperAdmin(actingAdmin)) redirect("/admin/login");
+    if (!actingAdmin || !isSuperAdmin(actingAdmin)) redirect("/admin/login");
 
     const updated: PricingPlan[] = PLAN_ORDER.map((planKey) => {
       const label = String(formData.get(`${planKey}_label`) ?? "").trim();
@@ -144,7 +144,7 @@ export default async function AdminPricingPage({ searchParams }: SearchParams) {
 
     await db.insert(activityLogs).values({
       actorType: "admin",
-      actorId: actingAdmin.id,
+      actorId: actingAdmin?.id ?? "admin",
       action: "pricing_updated",
       details: { plans: updated.map((p) => ({ plan: p.plan, price: p.price, enabled: p.enabled })) },
     });
