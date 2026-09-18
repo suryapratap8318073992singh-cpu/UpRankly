@@ -28,7 +28,9 @@ const NAV = [
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   // Server-side authorization — normal users can never reach this tree.
   const admin = await getAdminOrNull();
-  if (!isSuperAdmin(admin)) redirect("/admin/login");
+  if (!admin || !isSuperAdmin(admin)) {
+    redirect("/admin/login");
+  }
 
   return (
     <div className="flex min-h-screen bg-[#05070c]">
@@ -62,7 +64,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
           </div>
         </nav>
         <div className="border-t border-white/5 p-4">
-          <p className="mb-3 truncate text-xs text-zinc-400">{admin.email}</p>
+          <p className="mb-3 truncate text-xs text-zinc-400">{admin?.email ?? ""}</p>
           <LogoutButton admin />
         </div>
       </aside>
